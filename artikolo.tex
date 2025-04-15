@@ -1,0 +1,692 @@
+\documentclass[utf8]{scrartcl}
+
+% \usepackage{fontspec}
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows, calc}
+\usepgflibrary{fpu}
+\pgfdeclarelayer{bg}    % declare background layer
+\pgfsetlayers{bg,main}
+
+\usepackage{amsmath}
+\DeclareMathOperator{\pgkd}{pgkd}
+
+
+\title{Postkvantuma ĉifrado}
+\author{Johannes Mueller}
+\institute{KAEST 2024 – Žilina}
+\date{8a de Novembro 2024}
+
+
+\begin{document}
+
+\section{Enkonduko}
+
+Antaŭ ol ni rigardas la temon de postkvantuma ĉifrado, ni konsideru la signifon
+de ĉifrado ĝenerale.  Ĝi apartenas al la pli vasta temaro de datuma sekureco
+kaj datuma protektado.  Oni okupiĝas pri tiu temaro ĉefe celante la tri jenajn
+celojn:
+%
+\begin{description}
+\item[konfidenteco] neniu necelata povas legi la datumojn
+\item[fidindeco] pruveblo de la deveno kaj la aŭtenteco
+\item[disponeblo] disponebla kiam bezonataj
+\end{description}
+
+Ĉiuj tri de tiuj celoj estas gravaj por la funkciado de la nuntempa socio.  Ni
+ĉiuj fidas je tio, ke niaj komunikaĵoj privataj kaj ankaŭ ekzemple la
+sekretaĵoj kiel pasvortoj ne estu alireblaj por krimuloj – konfidenceco. Same
+gravas ke neniu krimulo povu falsi ekzemple nian komunikon kun la bankoj –
+fidindeco.  Kaj trie, gravas ke signifaj datumoj estu je dispono kiam
+bezonata. Se ne tutaj malsanulejoj, flughavenoj aŭ fevojsistemoj ĉesas funkcii.
+
+Por du el tiuj tri datumprotektaj celoj, la konfidenceco kaj la fidindeco,
+ĉifrado ludas ĉefan rolon.
+
+\subsection{Terminologio}
+
+Komence ni enkonduku kelkajn terminojn.
+%
+\begin{description}
+\item[klarmesaĝo] la neĉifrita mesaĝo, legebla por ĉiuj
+\item[ĉifraĵo] la ĉifrita mesaĝo, legebla nur por tiuj kiuj havas la ŝlosilon
+\item[ĉifri] transformi klarmesaĝon al ĉifraĵo per ŝlosilo
+\item[malĉifri] transformi ĉifraĵon al klarmesaĝo per ŝlosilo
+\item[ŝlosilo] datumo por ĉifri aŭ malĉifri mesaĝon
+\item[haketo] testsumo por pruvi ĉu mesaĝo estas aŭtenta
+\item[subskribo] pruvilo ke mesaĝo kaj la deveno estas aŭtentaj
+\end{description}
+
+
+
+\section{Klasika ĉifrado}
+
+La bazaj principoj de la moderna ĉifrado estis vortumitaj une de Kerckoff:
+%
+\begin{itemize}
+\item La sistemo ne estu sekreta (nur la ŝlosilo). Oni devas supozi ke la
+  atakanto scias kiel niaj ĉifrosistemoj funkcias. Krome ili estu publikaj, por
+  ke spertuloj povu esplori ilin por taksi la sekurecon.
+\item La ĉifraĵo ne estu distingebla de hazarda datumo.
+\item La ĉifraĵo estu transsendebla elektronike.
+\item La sistemo estu transportebla kaj uzebla pere de unu persono.
+\item La sistemo estu facile uzebla.
+\end{itemize}
+
+
+\subsection{Simetria ĉifrado}
+
+La simetria ĉifrado estas la pli facile komprenebla. Oni malĉifras la ĉifraĵon
+per la sama ŝlosilo per kiu oni ĉifris la klarmesaĝon.  Tio estas ekzemple tre
+taŭga por ĉifri la datumoj sur durdiskoj aŭ similaj datumujoj.  Kiam oni laĉas
+la komputilon aŭ aligas datumujon, oni devas ielmaniere enigi la ŝlosilon,
+ekzemple per tajpante ĝin. Poste la komputilo aŭtomate ĉifras ĉiujn skribaĵojn
+al la disko kaj malĉifras ĉiuj legaĵojn.  Simetriaj ĉifrosistemoj estas tre
+rapidaj, kaj devas esti tre rapidaj, ĉar malrapida aliro al durdisko bremsus la
+tutan sperton de komputila uzado.
+
+La granda malavantaĝo de simetria ĉifrado estas, ke la du komunikpartneroj
+devas interŝanĝi la ŝlosilon. Tio estas malfacila, ĉar por tio ja ankoraŭ ne
+ekzistas sekura komunikkanalo. Atakanto povus intercepti la ŝlosilon antaŭ la
+unua vera mesaĝo estas trnassendata.
+
+\begin{figure}
+  \begin{tikzpicture}[
+    ->,>=stealth,shorten >=1pt,
+    auto,
+    node distance=5cm,
+    ]
+    \node [fill=green!33] (km) {Klarmesaĝo $K$};
+    \node [fill=red!33, right of=km] (cf) {Ĉifraĵo $M$};
+
+    \draw (km) edge[bend left] node {$f_C(K, S)$} (cf);
+    \draw (cf) edge[bend left] node {$f_M(M, S)$} (km);
+  \end{tikzpicture}
+  \caption{La principo de simetria ĉifrado.}
+\end{figure}
+
+\subsection{Malsimetria ĉifrado}
+
+Malsimetria ĉifrado solvas la problemon de la interŝanĝo de la ŝlosiloj. Oni
+havas unu ŝlosilon por ĉifri la mesaĝon – la publikan ŝlosilon. Por malĉifri la
+mesaĝon oni bezonas la privatan ŝlosilon.  Por partopreni la komunikadon oni
+unue devas krei tian ŝlosilparon kaj doni la publikan ŝlosilon al la
+komunikpartnero.  Same oni riecevas de la komunikpartnero ties publikan
+ŝlosilon por ĉifri mesaĝojn.
+
+La malavantaĝo de malsimetria ĉifrado estas, ke ĝi estas multi pli malrapida aŭ
+bezonas pli da komputila potenco.  En la praktiko oni uzas kombinon de ambaŭ
+sistemoj. Oni kreas hazardan simetrian ŝlosilon. Per ĝi oni ĉifras la mesaĝon
+kaj poste ĉifras nur la simetrian ŝlosilon per la publika ŝlosilo de la
+komunikpartnero.  Tiu poste uzas sian privatan ŝlosilon por malĉifri la
+simetrian ŝlosilon kaj per ĝi malĉifras la mesaĝon.
+%
+\begin{figure}
+  \begin{tikzpicture}[node distance=0.5em,align=left]
+
+    \node (anjo) at (0,0) {Anjo};
+    \node (boĉjo) at (6,0) {Boĉjo};
+    \node (publika) at ($(anjo)!0.5!(boĉjo)$) {publiko};
+
+    \node [below=of anjo] (priv) {{\uncover<2->{\color<10->{red}$S_{priv}$}}};
+    \node [below=of priv] (pub_a) {{\uncover<3->{$\textcolor<11->{green!70!black}{S_{pub}} = P({\color<10->{red}S_{priv}})$}}};
+    \node (pub_b) at (pub_a -| boĉjo) {{\uncover<5->{$\color<11->{green!70!black}S_{pub}$}}};
+    \node (pub) at ($(pub_a)!0.5!(pub_b)$) {{\uncover<4->{$\color<11->{green!70!black}S_{pub}$}}};
+
+    \uncover<4->{\draw[->] (pub_a) -- (pub);}
+
+    \uncover<5->{\draw[->] (pub) -- (pub_b);}
+
+
+    \node [below=of pub_b] (klar) {{\uncover<6->{$K$}}};
+
+    \node [below=of klar] (cf_b) {{\uncover<7->{$M = f_C(K, \textcolor<11->{green!70!black}{S_{pub}})$}}};
+
+    \node (cf_a) at (cf_b -| anjo) {{\uncover<8->{$M$}}};
+    \uncover<8->{\draw[->] (cf_b) -- (cf_a);}
+
+    \node [below=of cf_a] (mcf) {{\uncover<9->{$K = f_M(M, {\color<10->{red}S_{priv}})$}}};
+
+    \begin{pgfonlayer}{bg}
+      \fill [fill=red!20]
+      ($(anjo) + (-4em,2em)$) rectangle ($(mcf) + (4em, -2em)$) coordinate (anjo border);
+
+      \fill [fill=green!20]
+      (anjo border) rectangle ($(boĉjo) + (-4em, 2em)$) coordinate (boĉjo border);
+
+      \fill [fill=magenta!20]
+      ($(boĉjo) + (4em, 2em)$) rectangle (anjo border -| boĉjo border);
+    \end{pgfonlayer}
+
+  \end{tikzpicture}
+  \caption{La principo de malsimetria ĉifrado}
+\end{figure}
+
+Estas grave emfazi, ke la tiaj ĉifrosistemo estas io tute ĉiutaga. Ĉiu
+retumilo, ĉiu retpoŝta programo, multaj tujmesaĝilo (Telegramo kutime ne)
+aplikas tiaspecan ĉifradon aŭtomate.
+
+
+\section{Matematikaj princpoj de ĉifrado}
+
+En la antaŭa ĉapitro ni konstatis, ke por simetria ĉifrado oni devas krei
+ŝlosilan paron de privata kaj publika ŝlosilo.  Gravas, certe, ke la privata
+ŝlosilo ne estu kalkulebla de la publika. Ni povas imagi, ke ni elektas
+hazardan privatan ŝlosilon kaj el ĝi kalkulas la privatan. Ni do bezonas kion
+oni nomas \emph{unudirektan funkcion}.  Tio estas matematika funkcio, kiu estas
+facile kalkulebla, sed multe malplifacile inversebla.
+
+Ekzemplo por tia unudirekta funkcio estas la produkto de du primoj.  Kalkuli la
+produkton de du primoj estas facila. Estas unu multobliga operacio.  La
+inverso, la faktorigo – havante la produkton de du primoj trovi la du primajn
+faktorojn estas multi malpli facila, ĉar oni fakte devas elprovi ĉiujn eblojn.
+Plie la komplekseco – la bezonata laboro por la faktorigo – kreskas pli rapide
+ol tiu por la multobligo.
+
+Po havi ian impreson pri la ciferoj jen ekzemplo. En la jaro 2020 oni starigis
+la rekordon por faktorigo. Oni faktorigis 250-ciferan, t.s. 829bitan nombron en
+2700 procesilaj horoj Intel Xeon Gold 6130 je 2.1 GHz.  Por kutimaj
+ĉifrosistemoj oni uzas 2048 aŭ eĉ 4096bitajn nombrojn.
+
+La interesa demando pri unudirektaj funkcioj estas, ĉu oni fakte estas certa,
+ke la inversa direkto estas tiom multe pli malfacila. Fakte oni nur, ĉär oni
+dum jardekoj de klopodoj ne sukcesis trovi pli facilan metodon.  Almenaŭ
+funkciantan sur klasikaj komputiloj.
+
+
+\section{Minaco de kvantuma komputilado}
+
+La supozo ke la faktorigo de primprodkto estas malfacila sur klasika komputilo
+ĝis nun staras.  Sed en la 1990aj jaroj oni teorie inventis la kvantuman
+komputilon.  Kvankam ĝi tiatempe estis nur matematika modelo, Peter Shor
+inventis por ĝi algoritmon por faktorigi primproduktojn kun multe malpli alta
+komplekseco.  Por kompreni la algoritmon de Shor, ni unue devas kompreni la
+principojn de kvantuma komputilo.
+
+
+\subsection{Principoj de kvantuma komputilo}
+
+Klasika komputilo ĉiam havas difinitan enigon, difinitan operacion kaj tial
+ankaŭ difinitan eligon, t.e. rezulton.  La stato de la komputilo ĉiam estas difinita.
+
+\begin{figure}
+  \begin{tikzpicture}[>=stealth,shorten >=1pt]
+    \begin{scope}[every node/.style=draw,inner xsep=15pt]
+      \node [draw] (input) {$5$};
+      \node [draw, right=3em of input] (operation) {$+3$};
+      \node [draw, right=3em of operation] (output) {$8$};
+    \end{scope}
+    \node [above=0.1em of input] {enigo};
+    \node [above=0.1em of operation] {operacio};
+    \node [above=0.1em of output] {eligo};
+
+    \draw [->] (input) -- (operation);
+    \draw [->] (operation) -- (output);
+  \end{tikzpicture}
+  \caption{Klasika komputilo havas difinitan staton.  La eniga registro havas
+    staton \texttt{3}, la eliga registro havas staton \texttt{5}.}
+\end{figure}
+
+Kontraste al klasika komputilo, kvantuma komputilo ne estas en difinita stato
+sed en \emph{superpozicio} de pluraj statoj samtempe.  La enigo estas ne unu
+difinita nombro, sed superpozicio de pluraj. La eligo etas la superpozicio de
+ĉiuj enigoj kun la operacio aplikita.
+
+\begin{figure}
+  \begin{tikzpicture}[>=stealth,shorten >=1pt]
+    \begin{scope}[every node/.style=draw]
+      \node [draw] (input) {
+        $\left|\textcolor{red}{1}\right> + \left|\textcolor{blue}{2}\right> +
+        \left|\textcolor{magenta}{3}\right>
+        + \left|\textcolor{green}{4}\right> + \left|\textcolor{cyan}{5}\right> $
+      };
+      \node [draw, right=1em of input] (operation) {$+3$};
+      \node [draw, right=1em of operation] (output) {
+        $
+        \left|\textcolor{red}{4}\right> + \left|\textcolor{blue}{5}\right> +
+        \left|\textcolor{magenta}{6}\right>
+        + \left|\textcolor{green}{7}\right> + \left|\textcolor{cyan}{8}\right>
+        $};
+    \end{scope}
+    \node [above=0.1em of input] {enigo};
+    \node [above=0.1em of operation] {operacio};
+    \node [above=0.1em of output] {eligo};
+
+    \draw [->] (input) -- (operation);
+    \draw [->] (operation) -- (output);
+  \end{tikzpicture}
+  \caption{La eniga registro de kvantuma komputilo estas superpozicio de pluraj
+    statoj, same la eliga registro.}
+\end{figure}
+
+Superpozicio signifas ke la registro estass kvazaŭ samtempe en pluraj statoj.
+Kiam oni kontrolas la staton de la registro, la superpozicio kolapsas kaj
+restas hazarde unu el le statoj de la superpozicio.
+
+Ni ja lernis, ke por faktorigo de du primoj oni konas nur la metodon, elprovi
+ĉiujn eblojn.  Do kio se oni metas superpozicion de ĉiuj ebloj al la eniga
+registro de kvantuma komputilo?  La eliga registro tiam estas superposicioj de
+ĉiuj produktoj, sed tio ne helpas, ĉar se oni kontrolas la rezulton, la
+superpozicio kolapsas al unu el la statoj kaj oni ne gajnis ion ajn.
+
+
+\subsection{La algoritmo de Shor}
+
+\begin{frame}[label=shor]
+  \frametitle{Algoritmo de Shor}
+  \[ N = a b \;\text{kun}\; a, b \in \mathbb{N} \]
+  \uncover<2->{Ni divenas $1 < d < N$, se $\pgkd(d, N) \neq 1$ → sukceso}
+  \uncover<3->{\[
+    \exists p  \in \mathbb{N} \left|  \right. d^p = m N + 1 \;\text{kun}\; m
+    \in \mathbb{N}
+  \]}%
+  \uncover<4->{\[ d^p - 1 = \left(d^{p/2} + 1\right)\left(d^{p/2} - 1\right) = m N \]}
+
+  \uncover<5->{%
+    En $37,5 \%$ de la divenoj
+    \begin{itemize}
+    \item $p$ estas para
+    \item $d^{p/2} \pm 1$ estas divizoro de $N$
+    \end{itemize}
+    \uncover<6>{%
+      \begin{beamercolorbox}[center, rounded=true, shadow=true]{notebox}
+        Kiel kalkuli $p$?
+    }
+    \end{beamercolorbox}
+  }
+\end{frame}
+
+\begin{frame}
+  \frametitle{Algoritmo de Shor – kvantuma parto}
+  Kun la divenita $d$:
+  \begin{figure}
+  \begin{tikzpicture}[>=stealth,shorten >=1pt]
+    \node [draw] (input) {
+      $\left|1\right> + \left|2\right> + \left|3\right> + \left|4\right> +
+      \left|5\right> + \left|6\right> + \left|7\right> + \left|8\right> + \ldots $
+    } node [above=1em] {\small superpozicio de ĉiuj eblaj valoroj por $p$};
+    \node [draw, below=of input.west] (step1) {$d^x$};
+    \node [draw, right=of step1] (potential) {
+      $\left|d^1\right> + \left|d^2\right> + \left|d^3\right> + \left|d^4\right> + \left|d^5\right> + \left|d^6\right> + \left|d^7\right> + \left|d^8\right> + \ldots $
+    };
+    \node [draw, below=of step1] (mod) {$x\mod N$};
+    \node [draw, right=of mod] (mods) {
+      \only<1-2>{%
+        $\left|r_1\right> + \left|r_2\right> + \left|r_3\right> + \left|r_4\right> + \left|r_5\right> + \left|r_6\right> + \left|r_7\right> + \left|r_8\right> + \ldots $
+      }%
+      \only<3->{%
+        $\left|r_1\right> + \left|r_2\right> + \left|\textcolor{red}{r_p}\right> + \left|r_\textcolor{blue}{1}\right> + \left|r_\textcolor{blue}{2}\right> + \left|\textcolor{red}{r_p}\right> + \left|r_\textcolor{blue}{1}\right> + \left|r_\textcolor{blue}{2}\right> + \ldots $
+      }
+    };
+    \path
+        (input.east) ++ (1em,-1.5em) coordinate (input path)
+        (step1.west) ++ (-1em,0) coordinate (step1 approach)
+        (potential.east) ++ (1em,-1.5em) coordinate (potential path)
+        (mod.west) ++ (-1em,0) coordinate (mod approach);
+
+
+    \draw [->] (input.east) -- (input -| input path) -- (input path) -- (step1 approach |- input path) -- (step1 approach) -- (step1.west);
+    \draw [->] (step1) -- (potential);
+    \draw [->] (potential.east) -- (potential -| potential path) -- (potential path) -- (mod approach |- potential path) -- (mod approach) -- (mod.west);
+    \draw [->] (mod) -- (mods);
+  \end{tikzpicture}
+  \end{figure}
+  \vfill
+  \[ d^i = m_i N + r_i \Longrightarrow d^i \mod N = r_i \]
+
+  \uncover<2->{\[ d^p = m_p N + 1 \; ; \; d^i = m_i N + r_i \Longrightarrow d^{i+p} = m_{i+p} N + r_i \]}
+\end{frame}
+
+\begin{frame}
+  \frametitle{La ripetiĝo de $p$}
+  \begin{figure}
+  \begin{tikzpicture}[>=stealth,shorten >=1pt]
+    \node [draw] (input) {$\left|1\right> + \left|2\right> + \left|3\right> + \left|4\right> + \left|5\right> + \left|6\right> + \ldots $};
+    \node [draw, below=of input.west] (step1) {$d^x$};
+    \node [draw, right=of step1] (potential) {$\left|d^1\right> + \left|d^2\right> + \left|d^3\right> + \left|d^4\right> + \left|d^5\right> + \left|d^6\right> + \ldots $};
+    \node [draw, below=of step1] (mod) {$x\mod N$};
+    \node [draw, right=of mod] (mods) {$\left|r_1\right> + \left|r_2\right> + \ldots + \left|r_p\right> + \left|r_1\right> + \left|r_2\right> + \ldots + \left|r_p\right> + \ldots $};
+
+    \path (input.east) ++ (1em,-1.5em) coordinate (input path)
+          (step1.west) ++ (-1em,0) coordinate (step1 approach)
+          (potential.east) ++ (1em,-1.5em) coordinate (potential path)
+          (mod.west) ++ (-1em,0) coordinate (mod approach);
+
+
+    \draw [->] (input.east) -- (input -| input path) -- (input path) -- (step1 approach |- input path) -- (step1 approach) -- (step1.west);
+    \draw [->] (step1) -- (potential);
+    \draw [->] (potential.east) -- (potential -| potential path) -- (potential path) -- (mod approach |- potential path) -- (mod approach) -- (mod.west);
+    \draw [->] (mod) -- (mods);
+
+    \uncover<2->{
+      \node [draw, below=of mod] (qft) {KFT};
+
+      \path (mods.east) ++ (1em, -1.5em) coordinate (mods path)
+            (qft.west) ++ (-1em, 0) coordinate (qft approach);
+
+      \draw [->] (mods.east) -- (mods -| mods path) -- (mods path) -- (qft approach |- mods path) -- (qft approach) -- (qft);
+    }
+    \uncover<3->{
+      \node [draw, right=of qft] (result) {$\left|\frac{1}{p}\right>$};
+      \draw [->] (qft) -- (result);
+    }
+  \end{tikzpicture}
+  \end{figure}
+  \vspace{1em}
+  \uncover<2->{\small KFT: kvantuma Fourier transformo}
+
+\end{frame}
+
+\againframe<7>{shor}
+
+\section{Postkvantuma ĉifrado}
+
+\begin{frame}
+  \frametitle{Postkvantuma ĉifrado}
+  Leviĝas kelkaj demandoj:
+  \begin{itemize}
+  \item<+-> Ĉu kvantumaj komputiloj realisme povos rompi ĉifrosistemojn?
+  \item<+-> Kiam? Ĉu post kvin jaroj? Ĉu post dek? Ĉu post 20?
+  \item<+-> Ĉu tio estas problemo?
+  \item<+-> Por ŝlosillongeco 4096 oni bezonus 4096 logikajn kubitojn
+  \item<+-> Rekorda kvantuma komputilo havas 5000 fizikajn kubitojn
+  \end{itemize}
+
+  \vspace{1em}
+  \uncover<+->{NIST okazigis konkurson}
+
+  \begin{itemize}
+  \item<+-> 69 kandidatoj en 2016
+  \item<+-> Post kvar rondoj 4 algoritmoj estis normigataj
+  \end{itemize}
+
+  \uncover<+->{%
+    \begin{beamercolorbox}[center, rounded=true, shadow=true]{notebox}
+      Promesplena: \emph{Crystal KYBER} – laticbazita sistemo
+    \end{beamercolorbox}
+  }
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Laticbazita ĉifrado}
+  Kio estas latico?
+
+  \begin{figure}
+  \begin{tikzpicture}
+    \coordinate (Origin)   at (0,0);
+
+    \coordinate (Bone) at (0.3,0.7);
+    \coordinate (Btwo) at (0.7,0.1);
+
+    % Latice points along b1+b2
+
+    \clip (-1, -1) rectangle (9, 6);
+
+    \foreach \i in {-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10} {
+      \foreach \j in {-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+        12, 13 ,14, 15}
+        \draw [fill = black]($\i*(Bone)+\j*(Btwo)$) circle (2pt);
+    }
+    % Draw the vectors
+    \draw [ultra thick,-latex,red] (Origin) -- (Bone) node [above left] {$b_1$};
+    \draw [ultra thick,-latex,red] (Origin) -- (Btwo) node [below right] {$b_2$};
+
+    \uncover<2->{\node[draw=blue, circle] at ($7*(Bone)+5*(Btwo)$) {};}
+
+    \uncover<3>{
+      \draw [thick, blue, ->] (Origin) -- ($7*(Bone)$) node[midway, left] {$7 b_1$};
+      \draw [thick, blue, ->] ($7*(Bone)$) -- ++ ($5*(Btwo)$) node[midway, above] {$5 b_2$};
+    }
+
+    \only<4->{
+      \draw [ultra thick,-latex,magenta] (Origin) -- ($3*(Bone)+7*(Btwo)$) node [above left] {$b'_1$};
+      \draw [ultra thick,-latex,magenta] (Origin) -- ($4*(Bone)+9*(Btwo)$) node [above left] {$b'_2$};
+    }
+  \end{tikzpicture}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Serĉado de plej proksima vektoro}
+  \begin{figure}
+  \begin{tikzpicture}
+    \coordinate (Origin)   at (0,0);
+
+    \coordinate (Bone) at (0.3,0.7);
+    \coordinate (Btwo) at (0.7,0.1);
+
+    \coordinate (BoneB) at ($3*(Bone)+7*(Btwo)$);
+    \coordinate (BtwoB) at ($4*(Bone)+9*(Btwo)$);
+
+    % Latice points along b1+b2
+
+    \clip (-1, -1) rectangle (9, 4.5);
+
+
+    \uncover<1-2,9->{
+      \foreach \i in {-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10} {
+        \foreach \j in {-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+          12, 13 ,14, 15}
+        \draw [fill = black]($\i*(Bone)+\j*(Btwo)$) circle (2pt);
+      }
+    }
+    % Draw the vectors
+    \only<1-3,8->{
+      \draw [ultra thick,-latex,red] (Origin) -- (Bone) node [above left] {$b_1$};
+      \draw [ultra thick,-latex,red] (Origin) -- (Btwo) node [below right] {$b_2$};
+    }
+
+    \only<2-4>{\draw[fill=blue] ($3.1*(Bone)+4.2*(Btwo)$) circle (2pt);}
+
+    \only<4->{
+       \draw [thick,-latex,magenta] (Origin) -- ($3*(Bone)+7*(Btwo)$) node [above left] {$b'_1$};
+       \draw [thick,-latex,magenta] (Origin) -- ($4*(Bone)+9*(Btwo)$) node [above left] {$b'_2$};
+     }
+
+    \only<5-6,10>{\draw[blue] ($3*(Bone)+4*(Btwo)$) circle (3pt) node [above left] {\color{blue}{$K$}};}
+    %\draw [->] (Origin) -- ++ ($-11*(BoneB)+9*(BtwoB)$);
+    \only<6->{\draw[fill=blue] ($3.1*(Bone)+4.2*(Btwo)$) circle (2pt) node [above right] {\color{blue}{$M$}};}
+  \end{tikzpicture}
+  \end{figure}
+  \uncover<5-6,10>{%
+    \[K = (-11, 9)\]
+  }
+
+\end{frame}
+
+\section{Kyber}
+
+\subsection*{Modula aritmetiko}
+
+\begin{frame}
+  \frametitle{Entjera ringo}
+
+  Modulo:
+  \begin{itemize}
+  \item $r = a \mod q$ signifas ke $r$ estas la resto de entjera divido $a/q$.
+  \item Entjeraro modulo $q$: $\mathbb{Z}_q = \left\{0, 1, 2, \ldots, q-1\right\}$
+  \item Ene de $\mathbb{Z}_q$ ĉia aritmetiko estas farataj $\mod q$.
+  \end{itemize}
+  \begin{columns}
+    \begin{column}<3->{0.5\textwidth}
+      Ekzemple por $\mathbb{Z}_{17}$:
+      \begin{itemize}
+      \item $9 + 15 = 7$
+      \item $9 - 15 = 11$
+      \item $9 \times 15 = 16$
+      \end{itemize}
+    \end{column}
+    \begin{column}<2->{0.5\textwidth}
+      \begin{tikzpicture}
+        \draw (0, 0) circle (5em);
+        \foreach \n in {0,1,...,16} {%
+          \pgfmathparse{-360 * \n / 17 + 90}\edef\a{\pgfmathresult}
+          \draw [fill] (\a:5em) circle(2pt);
+          \node at (\a:4.3em) {\tiny\n};
+        }
+        \node at (0, 0) {$\mathbb{Z}_{17}$};
+      \end{tikzpicture}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Polinoma ringo}
+  \begin{itemize}
+  \item Polinomo $n$-a grada: $c_nx^n + c_{n-1}x^{n-1} + \ldots + c_1 x + c_0$
+  \item $\mathbb{Z}_q[x]$: aro de ĉiuj polinomoj kun $c_n \in \mathbb{Z}_q
+    \;\forall n$
+
+  \end{itemize}
+
+  \vspace{2em}
+  \uncover<2->{Ekzemple $q=7$}
+  \begin{itemize}
+  \item<3-> $f(x) = 3x^3 + 4x^2 + 5$ kaj $g(x) = 2x^2 + 3x + 6$
+  \item<4-> $f(x) + g(x) = 3x^3 + 6x^2 + 3x + 4$
+  \item<5-> $f(x) - g(x) = 3x^3 + 2x^2 + 4x + 6$
+  \item<6-> $f(x) \times g(x) = 6x^5 + 3x^4 + 2x^3 + 6x^2 + x + 2$
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Polinoma ringo kun limigita grado}
+  \[
+    R_q = \mathbb{Z}_q[x]/(x^n-1)
+  \]
+
+  \begin{itemize}
+  \item<+-> $R_q$ estas ĉiuj polinomoj el $\mathbb{Z}_q[x]$ de grado malpli ol $n$
+  \item<+-> se $h(x) = f(x) \times g(x)$ havas gradon pli ol $n-1$ ni elektas
+    \[h(x) = f(x) \times g(x) \mod (x^n-1)\]
+  \end{itemize}
+
+  \vspace{0.5em}
+  \uncover<+->{
+    Ekzemplo $R_{41} = \mathbb{Z}_{41}[x](x^4-1)$:
+    \[
+      f(x) = 22x^3 + 17x^2 + 31 \; g(x) = x^3 + 19x^2 + 7x + 11
+    \]
+    \[
+      f(x) \times g(x) = 24x^3 + 35x^2 + 35x + 39
+    \]
+  }
+\end{frame}
+
+\subsection*{Kyber ekzemplo}
+
+\begin{frame}
+  \frametitle{Kyber ekzemplo: krei ŝlosilojn}
+  Parametroj: $q = 17, \bigl\lfloor\frac{q}{2}\bigr\rceil = 9, \; R_q = \mathbb{Z}_{17}[x](x^4 + 1)$\par
+  \pause
+  \vspace{0.5em}
+  Privata ŝlosilo hazarde elektita
+  \[ \mathbf{s} = \left( - 1x^3 - 1x^2 + 1x^1 + 0x^0, - 1x^3 +0x^2 - 1x^1 + 0x^0 \right) \]
+  \pause
+  Plia datumo hazarde elektita
+  \[
+    \mathbf{A} =
+    \begin{pmatrix}
+      6x^3 + 16x^2 + 16x + 11 & 9x^3 + 4x^3 + 6x + 3 \\
+      5x^3 + 3x^2 + 10x +1    & 6x^3 + x^2 + 9x + 15
+    \end{pmatrix}
+  \]
+  \[
+    \mathbf{e} = \left( x^2, x^2 - x \right)
+  \]
+  \[
+    \mathbf{t} = \mathbf{A}\mathbf{s} + \mathbf{e}
+  \]
+  \[
+    \mathbf{t} = \left( 16x^3 + 15x^2 + 7, 10x^3 + 12x^2 + 11x + 6 \right)
+  \]
+  \pause
+  La publika ŝlosilo konsistas el $(\mathbf{t}, \mathbf{A})$.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Kyber ekzemplo: ĉifro}
+  Ni elektas hazarde:
+  \[
+    \mathbf{r} = \left( -x^3 + x^2, x^3 + x^2 - 1 \right), \; \mathbf{e_1} = \left( x^2 + x, x^2 \right), \; e_2 = -x^3 - x^2
+  \]
+  \pause
+  Nia mesaĝo estas $11 = (1011)_2$. Kiel polinomo:
+  \[m_b = x^3 + x + 1\]
+  \pause
+  Ni grandigas la polinomon per multobligo kun $\bigl\lfloor\frac{q}{2}\bigr\rceil$:
+  \[m = \Bigl\lfloor\frac{q}{2}\Bigr\rceil m_b = 9x^3 + 9x + 9\]
+  \pause
+  Ni ĉifras:
+  \[
+    \mathbf{u} = \mathbf{A}^T\mathbf{r} + \mathbf{e_1} \;\text{kaj}\; v = \mathbf{t}^T\mathbf{r} + e_2 + m
+  \]
+  \pause
+  Nia ĉifrita mesaĝo konsistas el
+  \[
+    \begin{split}
+      \mathbf{u} & = (11x^3 + 11x^2 + 10x + 3, 4x^3 + 4x^2 + 13x + 11) \\
+      v & = 7x^3 + 6x^2 + 8x + 15
+    \end{split}
+  \]
+\end{frame}
+
+\begin{frame}
+  \frametitle{Kyber ekzemplo: malĉifro}
+  Ni malĉifras la mesaĝon ricevante mesaĝon kun eraroj:
+  \[m_e = v - \mathbf{s}^T\mathbf{u} = 7x^3 + 14x^2 + 7x + 5\]
+
+  \pause
+  \begin{columns}
+    \begin{column}{0.4\textwidth}
+      \begin{tikzpicture}
+        \draw (0, 0) circle (5em);
+        \foreach \n in {0,1,...,16} {%
+          \pgfmathparse{-360 * \n / 17 + 90}\edef\a{\pgfmathresult}
+          \draw [fill] (\a:5em) circle(2pt);
+          \node at (\a:4.3em) {\tiny\n};
+        }
+        \draw (0:5em) -- (180:5em);
+
+        \node (zero) at (90:2em) {$0$};
+        \node (nine) at (270:2em) {$\bigl\lfloor \frac{q}{2} \bigr\rceil = 9$};
+      \end{tikzpicture}
+    \end{column}
+
+    \begin{column}{0.6\textwidth}
+      \[
+        \begin{split}
+          7 & \longrightarrow 9 \\
+          14 & \longrightarrow 0 \\
+          7 & \longrightarrow 9 \\
+          5 & \longrightarrow 9
+        \end{split}
+      \]
+      \pause
+      \[\Longrightarrow m = 9x^3 + 9x + 9\]
+      \pause
+      \[\Longrightarrow m_b = x^3 + x + 1 \longrightarrow (1011)_2 = 11\]
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Konkludo}
+  Kion ni lernis:
+  \begin{itemize}
+  \item Ĉifrado estas matematiko – pli ekzakte – nombra teorio
+  \item Kvantumaj komputiloj ne plu estas matematika modelo
+  \item Ekzistas jam ĉifrosistemoj neatakeblaj per kvantumaj komputiloj
+  \item<2-> Vivu la matematiko
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \centering Dankon pro la atento
+\end{frame}
+\end{document}
+
+% Local Variables:
+% jinx-languages: "eo_EO"
+% End:
