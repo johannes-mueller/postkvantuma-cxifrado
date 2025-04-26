@@ -1,20 +1,24 @@
 \documentclass[utf8]{scrartcl}
 
-% \usepackage{fontspec}
+\usepackage{fontspec}
+
+\usepackage{polyglossia}
+\setdefaultlanguage{esperanto}
+\usepackage{lmodern}
 \usepackage{tikz}
 \usetikzlibrary{automata, positioning, arrows, calc}
 \usepgflibrary{fpu}
 \pgfdeclarelayer{bg}    % declare background layer
 \pgfsetlayers{bg,main}
 
+\usepackage{amsfonts}
 \usepackage{amsmath}
+
 \DeclareMathOperator{\pgkd}{pgkd}
 
 
 \title{Postkvantuma ĉifrado}
 \author{Johannes Mueller}
-\institute{KAEST 2024 – Žilina}
-\date{8a de Novembro 2024}
 
 
 \begin{document}
@@ -121,43 +125,43 @@ komunikpartnero.  Tiu poste uzas sian privatan ŝlosilon por malĉifri la
 simetrian ŝlosilon kaj per ĝi malĉifras la mesaĝon.
 %
 \begin{figure}
-  \begin{tikzpicture}[node distance=0.5em,align=left]
+  % \begin{tikzpicture}[node distance=0.5em,align=left]
 
-    \node (anjo) at (0,0) {Anjo};
-    \node (boĉjo) at (6,0) {Boĉjo};
-    \node (publika) at ($(anjo)!0.5!(boĉjo)$) {publiko};
+  %   \node (anjo) at (0,0) {Anjo};
+  %   \node (boĉjo) at (6,0) {Boĉjo};
+  %   \node (publika) at ($(anjo)!0.5!(boĉjo)$) {publiko};
 
-    \node [below=of anjo] (priv) {{\uncover<2->{\color<10->{red}$S_{priv}$}}};
-    \node [below=of priv] (pub_a) {{\uncover<3->{$\textcolor<11->{green!70!black}{S_{pub}} = P({\color<10->{red}S_{priv}})$}}};
-    \node (pub_b) at (pub_a -| boĉjo) {{\uncover<5->{$\color<11->{green!70!black}S_{pub}$}}};
-    \node (pub) at ($(pub_a)!0.5!(pub_b)$) {{\uncover<4->{$\color<11->{green!70!black}S_{pub}$}}};
+  %   \node [below=of anjo] (priv) {$S_{priv}$}};
+  %   \node [below=of priv] (pub_a) {$S_{pub} = P(S_{priv})$}};
+  %   \node (pub_b) at (pub_a -| boĉjo) {{S_{pub}$}};
+  %   \node (pub) at ($(pub_a)!0.5!(pub_b)$) {{S_{pub}$}};
 
-    \uncover<4->{\draw[->] (pub_a) -- (pub);}
+  %   \draw[->] (pub_a) -- (pub);
 
-    \uncover<5->{\draw[->] (pub) -- (pub_b);}
+  %   \draw[->] (pub) -- (pub_b);
 
 
-    \node [below=of pub_b] (klar) {{\uncover<6->{$K$}}};
+  %   \node [below=of pub_b] (klar) {$K$};
 
-    \node [below=of klar] (cf_b) {{\uncover<7->{$M = f_C(K, \textcolor<11->{green!70!black}{S_{pub}})$}}};
+  %   \node [below=of klar] (cf_b) {$M = f_C(K, S_{pub})$};
 
-    \node (cf_a) at (cf_b -| anjo) {{\uncover<8->{$M$}}};
-    \uncover<8->{\draw[->] (cf_b) -- (cf_a);}
+  %   \node (cf_a) at (cf_b -| anjo) {$M$};
+  %   \draw[->] (cf_b) -- (cf_a);
 
-    \node [below=of cf_a] (mcf) {{\uncover<9->{$K = f_M(M, {\color<10->{red}S_{priv}})$}}};
+  %   \node [below=of cf_a] (mcf) {$K = f_M(M, S_{priv})$};
 
-    \begin{pgfonlayer}{bg}
-      \fill [fill=red!20]
-      ($(anjo) + (-4em,2em)$) rectangle ($(mcf) + (4em, -2em)$) coordinate (anjo border);
+  %   \begin{pgfonlayer}{bg}
+  %     \fill [fill=red!20]
+  %     ($(anjo) + (-4em,2em)$) rectangle ($(mcf) + (4em, -2em)$) coordinate (anjo border);
 
-      \fill [fill=green!20]
-      (anjo border) rectangle ($(boĉjo) + (-4em, 2em)$) coordinate (boĉjo border);
+  %     \fill [fill=green!20]
+  %     (anjo border) rectangle ($(boĉjo) + (-4em, 2em)$) coordinate (boĉjo border);
 
-      \fill [fill=magenta!20]
-      ($(boĉjo) + (4em, 2em)$) rectangle (anjo border -| boĉjo border);
-    \end{pgfonlayer}
+  %     \fill [fill=magenta!20]
+  %     ($(boĉjo) + (4em, 2em)$) rectangle (anjo border -| boĉjo border);
+  %   \end{pgfonlayer}
 
-  \end{tikzpicture}
+  % \end{tikzpicture}
   \caption{La principo de malsimetria ĉifrado}
 \end{figure}
 
@@ -258,193 +262,225 @@ difinita nombro, sed superpozicio de pluraj. La eligo etas la superpozicio de
     statoj, same la eliga registro.}
 \end{figure}
 
-Superpozicio signifas ke la registro estass kvazaŭ samtempe en pluraj statoj.
+Superpozicio signifas ke la registro estas kvazaŭ samtempe en pluraj statoj.
 Kiam oni kontrolas la staton de la registro, la superpozicio kolapsas kaj
 restas hazarde unu el le statoj de la superpozicio.
 
 Ni ja lernis, ke por faktorigo de du primoj oni konas nur la metodon, elprovi
 ĉiujn eblojn.  Do kio se oni metas superpozicion de ĉiuj ebloj al la eniga
-registro de kvantuma komputilo?  La eliga registro tiam estas superposicioj de
+registro de kvantuma komputilo?  La eliga registro tiam estas superpozicioj de
 ĉiuj produktoj, sed tio ne helpas, ĉar se oni kontrolas la rezulton, la
 superpozicio kolapsas al unu el la statoj kaj oni ne gajnis ion ajn.
 
 
 \subsection{La algoritmo de Shor}
 
-\begin{frame}[label=shor]
-  \frametitle{Algoritmo de Shor}
-  \[ N = a b \;\text{kun}\; a, b \in \mathbb{N} \]
-  \uncover<2->{Ni divenas $1 < d < N$, se $\pgkd(d, N) \neq 1$ → sukceso}
-  \uncover<3->{\[
-    \exists p  \in \mathbb{N} \left|  \right. d^p = m N + 1 \;\text{kun}\; m
-    \in \mathbb{N}
-  \]}%
-  \uncover<4->{\[ d^p - 1 = \left(d^{p/2} + 1\right)\left(d^{p/2} - 1\right) = m N \]}
+Meze de la 1990aj jaroj \textsc{Peter Shor} inventis algoritmon, kiu uzante
+kvantuman komputilon kapablas faktorigi du nombrojn en logaritma
+komplekseco. Ni nun traludas ĝin matematike.
 
-  \uncover<5->{%
-    En $37,5 \%$ de la divenoj
-    \begin{itemize}
-    \item $p$ estas para
-    \item $d^{p/2} \pm 1$ estas divizoro de $N$
-    \end{itemize}
-    \uncover<6>{%
-      \begin{beamercolorbox}[center, rounded=true, shadow=true]{notebox}
-        Kiel kalkuli $p$?
-    }
-    \end{beamercolorbox}
-  }
-\end{frame}
+\minisec Tasko: faktorigi la nombron
 
-\begin{frame}
-  \frametitle{Algoritmo de Shor – kvantuma parto}
-  Kun la divenita $d$:
-  \begin{figure}
-  \begin{tikzpicture}[>=stealth,shorten >=1pt]
-    \node [draw] (input) {
-      $\left|1\right> + \left|2\right> + \left|3\right> + \left|4\right> +
-      \left|5\right> + \left|6\right> + \left|7\right> + \left|8\right> + \ldots $
-    } node [above=1em] {\small superpozicio de ĉiuj eblaj valoroj por $p$};
-    \node [draw, below=of input.west] (step1) {$d^x$};
-    \node [draw, right=of step1] (potential) {
-      $\left|d^1\right> + \left|d^2\right> + \left|d^3\right> + \left|d^4\right> + \left|d^5\right> + \left|d^6\right> + \left|d^7\right> + \left|d^8\right> + \ldots $
-    };
-    \node [draw, below=of step1] (mod) {$x\mod N$};
-    \node [draw, right=of mod] (mods) {
-      \only<1-2>{%
-        $\left|r_1\right> + \left|r_2\right> + \left|r_3\right> + \left|r_4\right> + \left|r_5\right> + \left|r_6\right> + \left|r_7\right> + \left|r_8\right> + \ldots $
-      }%
-      \only<3->{%
-        $\left|r_1\right> + \left|r_2\right> + \left|\textcolor{red}{r_p}\right> + \left|r_\textcolor{blue}{1}\right> + \left|r_\textcolor{blue}{2}\right> + \left|\textcolor{red}{r_p}\right> + \left|r_\textcolor{blue}{1}\right> + \left|r_\textcolor{blue}{2}\right> + \ldots $
-      }
-    };
-    \path
-        (input.east) ++ (1em,-1.5em) coordinate (input path)
-        (step1.west) ++ (-1em,0) coordinate (step1 approach)
-        (potential.east) ++ (1em,-1.5em) coordinate (potential path)
-        (mod.west) ++ (-1em,0) coordinate (mod approach);
+\begin{equation}
+  \label{eq:produkto}
+  N = a b \;\text{kun}\; a, b \in \mathbb{N}
+\end{equation}
+%
+Ni divenas $d$:
+\begin{equation}
+  \label{eq:diveno}
+  1 < d < N
+\end{equation}
+%
+Ni kalkulas la plej grandan komunan divizoron de $d$ kaj $n$.
+\begin{equation}
+  \label{eq:diveno-sukceso}
+  \text{se} \pgkd(d, N) > 1 \Longrightarrow\text{sukceso}
+\end{equation}
+%
+Ni scias ke ekzistas numero $p$:
+\begin{equation}
+  \label{eq:ekzistas-p}
+  \exists p  \in \mathbb{N} \left|  \right. d^p = m N + 1 \;\text{kun}\; m \in \mathbb{N}
+\end{equation}
+%
+Iomete rearanĝinte la antaŭan ekvacion ni ricevas:
+\begin{equation}
+  \label{eq:dp-divizoroj}
+  d^p - 1 = \left(d^{p/2} + 1\right)\left(d^{p/2} - 1\right) = m N
+\end{equation}
+%
+Oni povas kalkulo ke en $37,5 \%$ de la divenoj
+\begin{itemize}
+\item $p$ estas para
+\item $d^{p/2} \pm 1$ estas divizoro de $N$
+\end{itemize}
 
+La tasko do, estas trovi la $p$ de nia diveno $d$. Se ni tiam estas inter tiuj
+$37,5 \%$ ni sukcesis, se ne, ni ripetas kaj post kelkaj provoj kun granda
+probableco trovis divizoron de $p$.
 
-    \draw [->] (input.east) -- (input -| input path) -- (input path) -- (step1 approach |- input path) -- (step1 approach) -- (step1.west);
-    \draw [->] (step1) -- (potential);
-    \draw [->] (potential.east) -- (potential -| potential path) -- (potential path) -- (mod approach |- potential path) -- (mod approach) -- (mod.west);
-    \draw [->] (mod) -- (mods);
-  \end{tikzpicture}
-  \end{figure}
-  \vfill
-  \[ d^i = m_i N + r_i \Longrightarrow d^i \mod N = r_i \]
+Sekvas nun la kvantuma parto de la algoritmo de Shor. Unue kelkaj ekvacioj. Por
+ĉiuj niaj divenoj $d$ ni povas trovi por ĉiu $i\in\mathbb{N}$ du naturajn
+numberojn $m_i$ kaj $r_i$ tiel ke:
+\begin{equation}
+  \label{eq:di-rilato}
+  d^i = m_i N + r_i
+\end{equation}
+%
+Se ni tiun ekvacion multobligas kun \eqref{eq:ekzistas-p} ni ricevas:
+\begin{equation}
+  \label{eq:di-p-rilato}
+  d^{i+p} = m_{i+p} N + r_i
+\end{equation}
+%
+Ĉar $d$, $m$, kaj $N$ estas naturaj nombroj, $r$ estas la resto (la modulo) de
+la divido $d_i/N$
+\begin{equation}
+  \label{eq:di-mod-ri}
+  d^{i+p}\mod N = r_i
+\end{equation}
 
-  \uncover<2->{\[ d^p = m_p N + 1 \; ; \; d^i = m_i N + r_i \Longrightarrow d^{i+p} = m_{i+p} N + r_i \]}
-\end{frame}
+Tio estas sufiĉe interesa resulto, ĉar tio signifas, ke ni trovas la saman
+$r_i$ por ĉiu $p$a $i$. Do se ni trovas $r_i$ por ia nombro $i$, ni trovas la
+saman $r_i$ por $i + p$ kaj por $i + 2p$ kaj por ĉiuj $i + np$.
 
-\begin{frame}
-  \frametitle{La ripetiĝo de $p$}
-  \begin{figure}
-  \begin{tikzpicture}[>=stealth,shorten >=1pt]
-    \node [draw] (input) {$\left|1\right> + \left|2\right> + \left|3\right> + \left|4\right> + \left|5\right> + \left|6\right> + \ldots $};
-    \node [draw, below=of input.west] (step1) {$d^x$};
-    \node [draw, right=of step1] (potential) {$\left|d^1\right> + \left|d^2\right> + \left|d^3\right> + \left|d^4\right> + \left|d^5\right> + \left|d^6\right> + \ldots $};
-    \node [draw, below=of step1] (mod) {$x\mod N$};
-    \node [draw, right=of mod] (mods) {$\left|r_1\right> + \left|r_2\right> + \ldots + \left|r_p\right> + \left|r_1\right> + \left|r_2\right> + \ldots + \left|r_p\right> + \ldots $};
+Nun la la kvantuma komputilo. Ni komencas per superpozicio de ĉiuj eblaj
+nombroj por $p$.
+\[\left|1\right> + \left|2\right> + \left|3\right> + \left|4\right> +
+  \left|5\right> + \left|6\right> + \left|7\right> + \left|8\right> + \ldots \]
+%
+Al tiu eniga registro ni aplikas la operacion $d^x$ en kiu $d$ estas nia
+diveno. Poste la stato de la kvantuma komputilo estas la jena:
+\[\left|d^1\right> + \left|d^2\right> + \left|d^3\right> + \left|d^4\right> +
+  \left|d^5\right> + \left|d^6\right> + \left|d^7\right> + \left|d^8\right> +
+  \ldots\]
+%
+Nun ni aplikas la operacion $x\mod N$ kaj ricevas:
+\[\left|r_1\right> + \left|r_2\right> + \left|r_3\right> + \left|r_4\right> +
+  \left|r_5\right> + \left|r_6\right> + \left|r_7\right> + \left|r_8\right> +
+  \ldots\]
+%
+Ni scias, ke la sama $r_i$ ripetiĝas ĉiujn $p$ fojojn. Do se $p=3$ aspektus
+tia:
+\[\left|r_1\right> + \left|r_2\right> + \left|r_3\right> + \left|r_1\right> +
+  \left|r_2\right> + \left|r_3\right> + \left|r_1\right> + \left|r_2\right> +
+  \ldots\]
+%
+Do se ni iel povas mezuri la periodon de la tiu konstanta ripetiĝo, ni havus
+nian serĉatan valoron por $p$.
 
-    \path (input.east) ++ (1em,-1.5em) coordinate (input path)
-          (step1.west) ++ (-1em,0) coordinate (step1 approach)
-          (potential.east) ++ (1em,-1.5em) coordinate (potential path)
-          (mod.west) ++ (-1em,0) coordinate (mod approach);
+Por tio ekzistas fizika metodo de kvantuma Fourier transformo. Fourier
+transformoj estas matematika operacio, kalkuli la frekvencan spektron de ia
+signalo. Kaj la kvantuma Fourier transformo mezuras la frekvencan spektron de
+kvantuma superpozicio.
 
-
-    \draw [->] (input.east) -- (input -| input path) -- (input path) -- (step1 approach |- input path) -- (step1 approach) -- (step1.west);
-    \draw [->] (step1) -- (potential);
-    \draw [->] (potential.east) -- (potential -| potential path) -- (potential path) -- (mod approach |- potential path) -- (mod approach) -- (mod.west);
-    \draw [->] (mod) -- (mods);
-
-    \uncover<2->{
-      \node [draw, below=of mod] (qft) {KFT};
-
-      \path (mods.east) ++ (1em, -1.5em) coordinate (mods path)
-            (qft.west) ++ (-1em, 0) coordinate (qft approach);
-
-      \draw [->] (mods.east) -- (mods -| mods path) -- (mods path) -- (qft approach |- mods path) -- (qft approach) -- (qft);
-    }
-    \uncover<3->{
-      \node [draw, right=of qft] (result) {$\left|\frac{1}{p}\right>$};
-      \draw [->] (qft) -- (result);
-    }
-  \end{tikzpicture}
-  \end{figure}
-  \vspace{1em}
-  \uncover<2->{\small KFT: kvantuma Fourier transformo}
-
-\end{frame}
-
-\againframe<7>{shor}
+Se ni do aplikas ĝin al la registro de nia kvantuma komputilo, nia kvantuma
+komputilo restas en difinita stato:
+\[\left|\frac{1}{p}\right>\]
+%
+Tiun staton ni povas mezuri kaj de tio kalkuli la valoron por $p$. Nun ni havas
+la $37,5$ elcentan ŝancon ke ni jam havas niajn divizoron
+\[d^p \pm 1\].
 
 \section{Postkvantuma ĉifrado}
 
-\begin{frame}
-  \frametitle{Postkvantuma ĉifrado}
-  Leviĝas kelkaj demandoj:
-  \begin{itemize}
-  \item<+-> Ĉu kvantumaj komputiloj realisme povos rompi ĉifrosistemojn?
-  \item<+-> Kiam? Ĉu post kvin jaroj? Ĉu post dek? Ĉu post 20?
-  \item<+-> Ĉu tio estas problemo?
-  \item<+-> Por ŝlosillongeco 4096 oni bezonus 4096 logikajn kubitojn
-  \item<+-> Rekorda kvantuma komputilo havas 5000 fizikajn kubitojn
-  \end{itemize}
+Ĝis nun la Shor algoritmo estas ne pli ol matematika modelo. Oni ja sukcesis
+per kvantuma komputilo faktorigi la nombron $15$ sed ne pli altan nombron. Tio
+signifas kaj la vojo ĝis kvantumaj komputiloj ankaŭ estas longa. Tamen neniu
+scias, kiom rapida la evoluo de kvantumaj komputiloj estos. Ĉu ili endanĝerigas
+nian komunikon jam post kvin jaroj? Ĉu post dek? Ĉu dudek? Aŭ eble eĉ neniam.
 
-  \vspace{1em}
-  \uncover<+->{NIST okazigis konkurson}
-
-  \begin{itemize}
-  \item<+-> 69 kandidatoj en 2016
-  \item<+-> Post kvar rondoj 4 algoritmoj estis normigataj
-  \end{itemize}
-
-  \uncover<+->{%
-    \begin{beamercolorbox}[center, rounded=true, shadow=true]{notebox}
-      Promesplena: \emph{Crystal KYBER} – laticbazita sistemo
-    \end{beamercolorbox}
-  }
-\end{frame}
+Pro tio nescio jam en la 2000aj jaroj ĉifrosciencistoj lanĉis la disciplinon de
+\emph{postkvantuma ĉifrado}. La celo de postkvantuma ĉifrado estas elpensi
+ĉifrosistemojn imunaj kontraŭ la atakoj de kvantuma komputilo. En 2017 la Usona
+Nacia Instituto de Normoj kaj Teknologio (NIST) lanĉis konkurson en kiu
+partoprentantoj provis aligi siajn kandidatojn por postkvantuma
+ĉifrosistemo. La plej spertaj ĉifrosciencistoj de la mondo tiam klopodis trovi
+malfortojn en tiuj kandidatoj. Post kvar rondoj en 2024 restis kvar algoritmoj
+por kiu oni ne trovis funkciantan atakon. Unu el ili nomiĝas
+\textsc{Crystals}-Kyber.
 
 
-\begin{frame}
-  \frametitle{Laticbazita ĉifrado}
-  Kio estas latico?
+\subsection{Laticbazita ĉifrado}
 
-  \begin{figure}
+Latico estas grupo de matematikaj punktoj kun la trajto, ke oni de ĉiu punkto
+per taŭga kombinoj la samaj vektoroj venas al ĉiu alia punkto de la
+grupo. Figuro \ref{fig:latico} montras ekzempon por du dimensia latico.  Por
+$n$-dimensia latico sufiĉas ajna grupo de $n$ vektoroj, kiuj ne estas
+paralelaj.
+
+La plej simpla vektorogrupo sufiĉanta por per kombino de ajna punkto de la
+latico al ajna alia nomiĝas bazo. La bazo konsistas el unu vektoro por ĉiuj
+dimensio. Dudimensia latico bezonas tial du bazajn vektorojn $b_1$ kaj $b_2$.
+
+\begin{figure}
   \begin{tikzpicture}
     \coordinate (Origin)   at (0,0);
 
     \coordinate (Bone) at (0.3,0.7);
     \coordinate (Btwo) at (0.7,0.1);
 
+    \coordinate (BoneB) at ($3*(Bone)+7*(Btwo)$);
+    \coordinate (BtwoB) at ($4*(Bone)+9*(Btwo)$);
+
     % Latice points along b1+b2
 
-    \clip (-1, -1) rectangle (9, 6);
+    \clip (-1, -1) rectangle (9, 4.5);
 
     \foreach \i in {-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10} {
       \foreach \j in {-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
         12, 13 ,14, 15}
-        \draw [fill = black]($\i*(Bone)+\j*(Btwo)$) circle (2pt);
+      \draw [fill = black]($\i*(Bone)+\j*(Btwo)$) circle (2pt);
     }
     % Draw the vectors
-    \draw [ultra thick,-latex,red] (Origin) -- (Bone) node [above left] {$b_1$};
-    \draw [ultra thick,-latex,red] (Origin) -- (Btwo) node [below right] {$b_2$};
-
-    \uncover<2->{\node[draw=blue, circle] at ($7*(Bone)+5*(Btwo)$) {};}
-
-    \uncover<3>{
-      \draw [thick, blue, ->] (Origin) -- ($7*(Bone)$) node[midway, left] {$7 b_1$};
-      \draw [thick, blue, ->] ($7*(Bone)$) -- ++ ($5*(Btwo)$) node[midway, above] {$5 b_2$};
-    }
-
-    \only<4->{
-      \draw [ultra thick,-latex,magenta] (Origin) -- ($3*(Bone)+7*(Btwo)$) node [above left] {$b'_1$};
-      \draw [ultra thick,-latex,magenta] (Origin) -- ($4*(Bone)+9*(Btwo)$) node [above left] {$b'_2$};
-    }
+    \draw [ultra thick,-latex] (Origin) -- (Bone) node [above left] {$b_1$};
+    \draw [ultra thick,-latex] (Origin) -- (Btwo) node [below right] {$b_2$};
+    \draw[fill=gray] ($3.1*(Bone)+4.2*(Btwo)$) circle (2pt);
+    \draw [thick,-latex,magenta] (Origin) -- ($3*(Bone)+7*(Btwo)$) node [above left] {$b'_1$};
+    \draw [thick,-latex,magenta] (Origin) -- ($4*(Bone)+9*(Btwo)$) node [above left] {$b'_2$};
+    \draw[blue] ($3*(Bone)+4*(Btwo)$) circle (3pt) node [above left] {$K$};
+    % \draw [->] (Origin) -- ++ ($-11*(BoneB)+9*(BtwoB)$);
+    \draw[fill=gray] ($3.1*(Bone)+4.2*(Btwo)$) circle (2pt) node [above right]
+    {$M$};
   \end{tikzpicture}
-  \end{figure}
-\end{frame}
+  \caption{Dudimensia latico kun la bazaj vektoroj $b_1$ kaj $b_2$}
+  \label{fig:latico}
+\end{figure}
+
+Figuro \ref{fig:latico} ni vidas du bazojn por la sama latico, $(b_1, b_2)$ kaj
+$(b'_1, b'_2)$. Ambaŭ taŭgas kiel bazo. Tio signifas, ke oni per kombino de la
+vektoroj $b_1$ kaj $b_2$ oni povas de ĉiu punkto de la latico atingi ĉiujn
+aliajn de la latico. Same per kombino de $b'_1$ kaj $b'_2$. Estas evidente ke
+per la $(b_1, b_2)$ estas pli facile ol per la bazo $(b'_1, b'_2)$.
+
+\subsubsection{Serĉado de la plej proksima vektoro}
+
+La punkto $M$ en figuro \ref{fig:latico} ne estas latica punkto. La plej
+proksima latica punkto estas evidente $K$. Tion ni bone povas vidi, ĉar ĉiuj
+laticaj punktoj estas markitaj en la diagramo. Sed kio se ne, se ni havus la
+bonan bazon $(b_1, b_2)$ verŝajne ankaŭ estas sufiĉe facile trovi $K$ de $M$,
+sed kio, se ni havas nur la malbonan bazon $(b'_1, b'_2)$? Tiam estas multe pli
+malfacile. Kaj jen unudirekta funkcio.
+
+Ĉifrasistemo povas esti ekzemple ke Anjo elpensas la du vektorojn $(b_1, b_2)$
+kaj el kombinoj de ili la vektorojn $(b'_1, b'_2)$. Tiujn vektorojn ŝi sendas
+al Boĉjo. Boĉjo kodigas mesaĝon por Anjo kiel kombinon de $(b'_1, b'_2)$. La
+rezulto estas $K$. Tiun punkton li iomete ŝovas hazarde al $M$ kaj sendas la
+koordinatojn de $M$ al Anjo. Anjo konas la bonan bazon $(b_1, b_2)$ kaj per ĝi
+povas facile trovi la latican punkton $K$ kaj poste rekonstrui la mesaĝon de
+Boĉjo.
+
+Tio estas ekzemplo por simpla laticbazita ĉifrosistemo. Montriĝas ke ĝi ne
+estas sekura. Oni montris sukcesajn atakojn al ĝi.
+
+
+\subsection{Kyber – la normigita laticbazita ĉifrosistemo}
+
+La normigita kaj jam uzebla laticbazita ĉifrosistemo nomiĝas
+\textsc{Crystals}-Kyber}. Pincipe funkcias simile kiel ni antaŭe vidis grafike.
+
+\end{document}
 
 \begin{frame}
   \frametitle{Serĉado de plej proksima vektoro}
@@ -688,5 +724,6 @@ superpozicio kolapsas al unu el la statoj kaj oni ne gajnis ion ajn.
 \end{document}
 
 % Local Variables:
-% jinx-languages: "eo_EO"
+% jinx-languages: "eo"
+% TeX-master: t
 % End:
